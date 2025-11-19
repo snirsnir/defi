@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defibrillator Training - אימון דפיברילטור</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, 'Arial', 'Traditional Arabic', sans-serif;
+            background: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            direction: rtl;
+        }
+
+        /* RTL/LTR support */
+        body.ltr {
+            direction: ltr;
+        }
+
+        body.rtl {
+            direction: rtl;
+        }
+
+        /* Better Arabic font support */
+        body[lang="ar"],
+        body[lang="ar"] * {
+            font-family: 'Traditional Arabic', 'Arial', 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        /* Hebrew font support */
+        body[lang="he"],
+        body[lang="he"] * {
+            font-family: 'Arial', 'David', 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        /* English font support */
+        body[lang="en"],
+        body[lang="en"] * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Hide all screens by default */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .screen.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Idle Screen */
+        #idle-screen {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Stage 1: Opening Animation */
+        #stage1-screen {
+            background: #000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .story-text {
+            color: #fff;
+            font-size: 3em;
+            text-align: center;
+            padding: 40px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+            animation: slideInFromRight 5s ease-out forwards;
+            opacity: 0;
+            white-space: nowrap;
+        }
+
+        @keyframes slideInFromRight {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+        }
+
+        .fade-to-black {
+            animation: fadeToBlack 2s ease-in forwards;
+        }
+
+        @keyframes fadeToBlack {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Video Screens */
+        #video1-screen, #video2-screen {
+            background: #000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Stage 2: Instructions */
+        #stage2-screen {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .instruction-title {
+            color: white;
+            font-size: 4em;
+            font-weight: bold;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+            animation: pulse 2s infinite;
+            text-align: center;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .def-image {
+            max-width: 80%;
+            max-height: 50vh;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            margin-bottom: 40px;
+        }
+
+        .instruction-text {
+            color: white;
+            font-size: 3em;
+            text-align: center;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        /* Stage 3: Shock Ready */
+        #stage3-screen {
+            background: linear-gradient(135deg, #ffa751 0%, #ffe259 100%);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .shock-title {
+            color: #d32f2f;
+            font-size: 4em;
+            font-weight: bold;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+            animation: blink 1s infinite;
+            text-align: center;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+
+        .shock-image {
+            max-width: 80%;
+            max-height: 60vh;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        /* Stage 5: Success Screen */
+        #stage5-screen {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+        }
+
+        .success-title {
+            color: white;
+            font-size: 5em;
+            font-weight: bold;
+            text-shadow: 3px 3px 15px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+            animation: celebration 1s ease-in-out infinite;
+            text-align: center;
+            z-index: 5;
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: rotate(-5deg) scale(1); }
+            50% { transform: rotate(5deg) scale(1.1); }
+        }
+
+        .health-image {
+            max-width: 70%;
+            max-height: 50vh;
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            margin-bottom: 40px;
+            animation: zoomIn 1s ease-out;
+            z-index: 5;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Fireworks Animation */
+        .fireworks {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .firework {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: explode 1.5s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--color);
+            animation: confettiFall 4s linear forwards;
+            z-index: 2;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Debug Info */
+        #debug-info {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9em;
+            z-index: 1000;
+            display: none; /* Set to 'block' for debugging */
+        }
+    </style>
+</head>
+<body>
+    <!-- Debug Info -->
+    <div id="debug-info">
+        <div>Current Stage: <span id="debug-stage">idle</span></div>
+        <div>Language: <span id="debug-lang">none</span></div>
+        <div>Timeout Active: <span id="debug-timeout">yes</span></div>
+    </div>
+
+    <!-- Idle Screen -->
+    <div id="idle-screen" class="screen active"></div>
+
+    <!-- Stage 1: Opening Animation + Text -->
+    <div id="stage1-screen" class="screen">
+        <div class="story-text" id="story-text"></div>
+    </div>
+
+    <!-- Video 1 Screen -->
+    <div id="video1-screen" class="screen">
+        <video id="video1" preload="auto">
+            <source src="vid/1.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- Stage 2: Instructions -->
+    <div id="stage2-screen" class="screen">
+        <h1 class="instruction-title" id="stage2-title"></h1>
+        <img src="images/def1.png" alt="Defibrillator" class="def-image">
+        <p class="instruction-text" id="stage2-instruction"></p>
+    </div>
+
+    <!-- Stage 3: Shock Ready - Wait for D2 -->
+    <div id="stage3-screen" class="screen">
+        <h1 class="shock-title" id="stage3-title"></h1>
+        <p class="instruction-text" id="stage3-instruction"></p>
+    </div>
+
+    <!-- Stage 4: Performing Shock - def2.png -->
+    <div id="stage4-screen" class="screen">
+        <img src="images/def2.png" alt="Shock in Progress" class="shock-image">
+    </div>
+
+    <!-- Video 2 Screen -->
+    <div id="video2-screen" class="screen">
+        <video id="video2" preload="auto">
+            <source src="vid/2.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- Stage 5: Success Screen -->
+    <div id="stage5-screen" class="screen">
+        <div class="fireworks" id="fireworks-container"></div>
+        <h1 class="success-title" id="stage5-title"></h1>
+        <img src="images/health.png" alt="Success" class="health-image">
+    </div>
+
+    <script>
+        // =====================================
+        // Configuration & Translations
+        // =====================================
+
+        const CONFIG = {
+            IDLE_TIMEOUT_MS: 2 * 60 * 1000, // 2 minutes
+            STORY_ANIMATION_DURATION: 5000, // 5 seconds for text scroll
+            FADE_TO_BLACK_DURATION: 2000, // 2 seconds fade
+            COUNTDOWN_DURATION: 5000, // countdown.wav - 5 seconds
+            DEFI_DURATION: 3000, // defi.wav - 3 seconds
+            SUCCESS_DURATION: 10000, // Success screen display time
+        };
+
+        const TRANSLATIONS = {
+            he: {
+                story: "לפני שנים רבות, בקניון רמת אביב, התהלכו להם זוג חביב..",
+                stage2Title: "הדפיברילטור בידכם!!",
+                stage2Instruction: "כעת קחו את הכפות והדביקו לאיש!!",
+                stage3Title: "⚡ מוכנים לתת שוק חשמלי! ⚡",
+                stage3Instruction: "לחצו על הכפתור בצד לתת שוק חשמלי!",
+                stage5Title: "ברכות, הצלתם את הבחור הנחמד!!"
+            },
+            en: {
+                story: "Many years ago, at Ramat Aviv Mall, a lovely couple was walking..",
+                stage2Title: "The Defibrillator is in Your Hands!!",
+                stage2Instruction: "Now take the pads and attach them to the person!!",
+                stage3Title: "⚡ Ready to Give Electric Shock! ⚡",
+                stage3Instruction: "Press the button on the side to deliver the shock!",
+                stage5Title: "Congratulations, You Saved the Nice Guy!!"
+            },
+            ar: {
+                story: "منذ سنوات عديدة، في مركز رمات أفيف التجاري، كان زوجان لطيفان يتجولان..",
+                stage2Title: "جهاز إزالة الرجفان بين يديك!!",
+                stage2Instruction: "الآن خذ الأقطاب الكهربائية وألصقها بالشخص!!",
+                stage3Title: "⚡ جاهز لإعطاء الصدمة الكهربائية! ⚡",
+                stage3Instruction: "اضغط على الزر الجانبي لإعطاء الصدمة!",
+                stage5Title: "تهانينا، لقد أنقذت الشخص اللطيف!!"
+            }
+        };
+
+        // =====================================
+        // State Management
+        // =====================================
+
+        let currentStage = 'idle';
+        let currentLanguage = 'he'; // Start with Hebrew
+        let timeoutTimer = null;
+        let isTimeoutPaused = false;
+        const languageOrder = ['he', 'en', 'ar']; // Language cycling order
+
+        // =====================================
+        // Timeout Management
+        // =====================================
+
+        function resetTimeout() {
+            if (isTimeoutPaused) return;
+
+            clearTimeout(timeoutTimer);
+            timeoutTimer = setTimeout(() => {
+                goToIdle();
+            }, CONFIG.IDLE_TIMEOUT_MS);
+            updateDebug();
+        }
+
+        function pauseTimeout() {
+            isTimeoutPaused = true;
+            clearTimeout(timeoutTimer);
+            updateDebug();
+        }
+
+        function resumeTimeout() {
+            isTimeoutPaused = false;
+            resetTimeout();
+        }
+
+        function goToIdle() {
+            console.log('⏰ Timeout - Going to idle screen');
+            currentStage = 'idle';
+            currentLanguage = 'he'; // Reset to Hebrew
+
+            // Reset to RTL (Hebrew)
+            updateTextDirection();
+
+            showScreen('idle-screen');
+            pauseTimeout();
+            updateDebug();
+        }
+
+        // =====================================
+        // Screen Transitions
+        // =====================================
+
+        function showScreen(screenId) {
+            console.log('🖥️  Showing screen:', screenId);
+
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // Show target screen
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.style.display = 'flex';
+                targetScreen.offsetHeight; // Trigger reflow
+                targetScreen.classList.add('active');
+            }
+
+            updateDebug();
+        }
+
+        // =====================================
+        // Keyboard Listener
+        // =====================================
+
+        const keyMap = {
+            'Numpad1': 'D1',
+            'Numpad2': 'D2',
+            'Numpad3': 'D3',
+            'Numpad4': 'D4',
+            'Numpad5': 'D5',
+            'Numpad6': 'D6',
+            'Digit1': 'D1',
+            'Digit2': 'D2',
+            'Digit3': 'D3',
+            'Digit4': 'D4',
+            'Digit5': 'D5',
+            'Digit6': 'D6'
+        };
+
+        document.addEventListener('keydown', function(event) {
+            const keyCode = event.code;
+            const mappedKey = keyMap[keyCode];
+
+            if (mappedKey) {
+                console.log('⌨️  Key pressed:', mappedKey);
+                handleKeyPress(mappedKey);
+            }
+        });
+
+        function handleKeyPress(key) {
+            // Reset timeout on any interaction (except during videos)
+            if (!isTimeoutPaused) {
+                resetTimeout();
+            }
+
+            // D1 - Start app OR cycle language
+            if (key === 'D1') {
+                if (currentStage === 'idle') {
+                    // First press - start the app with current language (Hebrew)
+                    startStage1();
+                } else {
+                    // Cycle to next language
+                    cycleLanguage();
+                }
+                return;
+            }
+
+            // Stage-specific actions
+            switch (currentStage) {
+                case 'stage2':
+                    if (key === 'D6') {
+                        // D6 = Pads placed on body, move to "ready for shock" screen
+                        startStage3();
+                    }
+                    break;
+
+                case 'stage3':
+                    if (key === 'D2') {
+                        // D2 = Give shock button pressed
+                        performShock();
+                    }
+                    break;
+            }
+        }
+
+        // =====================================
+        // Language Selection
+        // =====================================
+
+        function cycleLanguage() {
+            const currentIndex = languageOrder.indexOf(currentLanguage);
+            const nextIndex = (currentIndex + 1) % languageOrder.length;
+            currentLanguage = languageOrder[nextIndex];
+
+            console.log('🌍 Language cycled to:', currentLanguage);
+
+            // Update text direction for RTL/LTR
+            updateTextDirection();
+
+            // Update all text on screen if we're in a stage with text
+            updateCurrentStageText();
+            updateDebug();
+        }
+
+        function updateTextDirection() {
+            const body = document.body;
+            const html = document.documentElement;
+
+            if (currentLanguage === 'en') {
+                // English = LTR
+                body.classList.remove('rtl');
+                body.classList.add('ltr');
+                html.setAttribute('dir', 'ltr');
+                html.setAttribute('lang', 'en');
+                console.log('📝 Text direction set to LTR (English)');
+            } else {
+                // Hebrew and Arabic = RTL
+                body.classList.remove('ltr');
+                body.classList.add('rtl');
+                html.setAttribute('dir', 'rtl');
+                html.setAttribute('lang', currentLanguage);
+                console.log('📝 Text direction set to RTL (' + currentLanguage + ')');
+            }
+        }
+
+        function updateCurrentStageText() {
+            // Update text based on current stage
+            if (currentStage === 'stage1') {
+                const storyText = document.getElementById('story-text');
+                if (storyText) {
+                    storyText.textContent = TRANSLATIONS[currentLanguage].story;
+                }
+            } else if (currentStage === 'stage2') {
+                document.getElementById('stage2-title').textContent = TRANSLATIONS[currentLanguage].stage2Title;
+                document.getElementById('stage2-instruction').textContent = TRANSLATIONS[currentLanguage].stage2Instruction;
+            } else if (currentStage === 'stage3') {
+                document.getElementById('stage3-title').textContent = TRANSLATIONS[currentLanguage].stage3Title;
+                const stage3Instruction = document.getElementById('stage3-instruction');
+                if (stage3Instruction) {
+                    stage3Instruction.textContent = TRANSLATIONS[currentLanguage].stage3Instruction;
+                }
+            } else if (currentStage === 'stage5') {
+                document.getElementById('stage5-title').textContent = TRANSLATIONS[currentLanguage].stage5Title;
+            }
+        }
+
+        // =====================================
+        // Stage 1: Opening Animation
+        // =====================================
+
+        function startStage1() {
+            console.log('🎬 Starting Stage 1: Opening Animation');
+            currentStage = 'stage1';
+
+            // Set text direction based on current language
+            updateTextDirection();
+
+            showScreen('stage1-screen');
+
+            const storyText = document.getElementById('story-text');
+            storyText.textContent = TRANSLATIONS[currentLanguage].story;
+
+            // Reset animation
+            storyText.style.animation = 'none';
+            storyText.offsetHeight; // Trigger reflow
+            storyText.style.animation = null;
+
+            // After text animation, fade to black then play video
+            setTimeout(() => {
+                storyText.classList.add('fade-to-black');
+
+                setTimeout(() => {
+                    playVideo1();
+                }, CONFIG.FADE_TO_BLACK_DURATION);
+            }, CONFIG.STORY_ANIMATION_DURATION);
+        }
+
+        // =====================================
+        // Video 1
+        // =====================================
+
+        function playVideo1() {
+            console.log('🎥 Playing Video 1');
+            currentStage = 'video1';
+            pauseTimeout(); // Don't count timeout during video
+            showScreen('video1-screen');
+
+            const video = document.getElementById('video1');
+            video.currentTime = 0;
+            video.play().catch(err => console.error('Video 1 play error:', err));
+
+            video.onended = () => {
+                console.log('✅ Video 1 ended');
+                resumeTimeout();
+                startStage2();
+            };
+        }
+
+        // =====================================
+        // Stage 2: Instructions
+        // =====================================
+
+        function startStage2() {
+            console.log('📋 Starting Stage 2: Instructions');
+            currentStage = 'stage2';
+            resetTimeout();
+            showScreen('stage2-screen');
+
+            document.getElementById('stage2-title').textContent = TRANSLATIONS[currentLanguage].stage2Title;
+            document.getElementById('stage2-instruction').textContent = TRANSLATIONS[currentLanguage].stage2Instruction;
+
+            // Wait for button press (D6) - handled by keyboard listener
+        }
+
+        // =====================================
+        // Stage 3: Ready for Shock - Wait for D2
+        // =====================================
+
+        function startStage3() {
+            console.log('⚡ Starting Stage 3: Ready for Shock - Waiting for D2');
+            currentStage = 'stage3';
+            resetTimeout();
+            showScreen('stage3-screen');
+
+            document.getElementById('stage3-title').textContent = TRANSLATIONS[currentLanguage].stage3Title;
+            document.getElementById('stage3-instruction').textContent = TRANSLATIONS[currentLanguage].stage3Instruction;
+
+            // Wait for D2 button press - handled by keyboard listener
+        }
+
+        function performShock() {
+            if (currentStage !== 'stage3') return;
+
+            console.log('⚡⚡⚡ Performing Shock!');
+            currentStage = 'stage4';
+            pauseTimeout(); // Don't count timeout during shock
+
+            // Show def2.png image
+            showScreen('stage4-screen');
+
+            // Play countdown sound (5 seconds)
+            playSound('sound/countdown.wav');
+
+            // After 5 seconds, play defi sound (3 seconds)
+            setTimeout(() => {
+                playSound('sound/defi.wav');
+            }, CONFIG.COUNTDOWN_DURATION);
+
+            // After 8 seconds total (5 + 3), move to video 2
+            setTimeout(() => {
+                playVideo2();
+            }, CONFIG.COUNTDOWN_DURATION + CONFIG.DEFI_DURATION);
+        }
+
+        // =====================================
+        // Audio Player
+        // =====================================
+
+        function playSound(src) {
+            console.log('🔊 Playing sound:', src);
+            const audio = new Audio(src);
+            audio.play().catch(err => {
+                console.error('Error playing sound:', err);
+            });
+        }
+
+        // =====================================
+        // Video 2
+        // =====================================
+
+        function playVideo2() {
+            console.log('🎥 Playing Video 2');
+            currentStage = 'video2';
+            pauseTimeout(); // Don't count timeout during video
+            showScreen('video2-screen');
+
+            const video = document.getElementById('video2');
+            video.currentTime = 0;
+            video.play().catch(err => console.error('Video 2 play error:', err));
+
+            video.onended = () => {
+                console.log('✅ Video 2 ended');
+                startStage5();
+            };
+        }
+
+        // =====================================
+        // Stage 5: Success Screen
+        // =====================================
+
+        function startStage5() {
+            console.log('🎉 Starting Stage 5: Success!');
+            currentStage = 'stage5';
+            pauseTimeout();
+            showScreen('stage5-screen');
+
+            document.getElementById('stage5-title').textContent = TRANSLATIONS[currentLanguage].stage5Title;
+
+            // Create fireworks and confetti
+            createFireworks();
+            createConfetti();
+
+            // After success duration, return to idle
+            setTimeout(() => {
+                goToIdle();
+            }, CONFIG.SUCCESS_DURATION);
+        }
+
+        // =====================================
+        // Fireworks Animation
+        // =====================================
+
+        function createFireworks() {
+            const container = document.getElementById('fireworks-container');
+            container.innerHTML = '';
+
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff', '#ffa500'];
+
+            // Create multiple fireworks bursts
+            for (let burst = 0; burst < 15; burst++) {
+                setTimeout(() => {
+                    const x = Math.random() * window.innerWidth;
+                    const y = Math.random() * (window.innerHeight / 2);
+
+                    for (let i = 0; i < 40; i++) {
+                        const firework = document.createElement('div');
+                        firework.className = 'firework';
+                        firework.style.left = x + 'px';
+                        firework.style.top = y + 'px';
+                        firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+                        const angle = (Math.PI * 2 * i) / 40;
+                        const velocity = 100 + Math.random() * 150;
+                        const tx = Math.cos(angle) * velocity;
+                        const ty = Math.sin(angle) * velocity;
+
+                        firework.style.setProperty('--tx', tx + 'px');
+                        firework.style.setProperty('--ty', ty + 'px');
+
+                        container.appendChild(firework);
+
+                        setTimeout(() => {
+                            firework.remove();
+                        }, 1500);
+                    }
+                }, burst * 400);
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff1493'];
+
+            for (let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.top = '-10px';
+                    confetti.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 4000);
+                }, i * 60);
+            }
+        }
+
+        // =====================================
+        // Debug Info
+        // =====================================
+
+        function updateDebug() {
+            document.getElementById('debug-stage').textContent = currentStage;
+            document.getElementById('debug-lang').textContent = currentLanguage || 'none';
+            document.getElementById('debug-timeout').textContent = isTimeoutPaused ? 'paused' : 'active';
+        }
+
+        // =====================================
+        // Initialization
+        // =====================================
+
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 Defibrillator Training App Initialized');
+            console.log('📦 Configuration:', CONFIG);
+
+            // Set idle screen background
+            const idleScreen = document.getElementById('idle-screen');
+            idleScreen.style.backgroundImage = 'url(images/idle.png)';
+
+            // Start with idle screen and timeout
+            currentStage = 'idle';
+            showScreen('idle-screen');
+            resetTimeout();
+
+            console.log('✅ Ready!');
+            console.log('Press D1 to start (Hebrew default)');
+            console.log('Press D1 again to cycle languages: Hebrew → English → Arabic');
+        });
+    </script>
+</body>
+</html>
