@@ -541,6 +541,12 @@
                     if (key === 'D6') {
                         // D6 = Pads placed on body, move to "ready for shock" screen
                         startStage3();
+
+                        // After 1 second, automatically press D4
+                        setTimeout(() => {
+                            console.log('🤖 Auto-pressing D4 after D6');
+                            handleKeyPress('D4');
+                        }, 1000);
                     }
                     break;
 
@@ -548,6 +554,9 @@
                     if (key === 'D2') {
                         // D2 = Give shock button pressed
                         performShock();
+                    } else if (key === 'D4') {
+                        // D4 = Auto-pressed after D6, but does nothing
+                        console.log('D4 pressed (no action in stage3)');
                     }
                     break;
             }
@@ -699,7 +708,11 @@
         }
 
         function performShock() {
-            if (currentStage !== 'stage3') return;
+            if (currentStage !== 'stage3' && currentStage !== 'stage4') {
+                // Allow shock from stage3 or if already triggered
+                if (currentStage === 'stage4') return; // Already in shock
+                return;
+            }
 
             console.log('⚡⚡⚡ Performing Shock!');
             currentStage = 'stage4';
