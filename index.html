@@ -538,15 +538,10 @@
             // Stage-specific actions
             switch (currentStage) {
                 case 'stage2':
-                    if (key === 'D6') {
-                        // D6 = Pads placed on body, move to "ready for shock" screen
+                    // D4 OR D6 = Pads placed on body
+                    if (key === 'D4' || key === 'D6') {
+                        console.log('🩺 Pads connected to body (D4/D6 detected)');
                         startStage3();
-
-                        // After 1 second, automatically press D4
-                        setTimeout(() => {
-                            console.log('🤖 Auto-pressing D4 after D6');
-                            handleKeyPress('D4');
-                        }, 1000);
                     }
                     break;
 
@@ -554,9 +549,6 @@
                     if (key === 'D2') {
                         // D2 = Give shock button pressed
                         performShock();
-                    } else if (key === 'D4') {
-                        // D4 = Auto-pressed after D6, but does nothing
-                        console.log('D4 pressed (no action in stage3)');
                     }
                     break;
             }
