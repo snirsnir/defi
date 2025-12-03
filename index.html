@@ -83,33 +83,46 @@
         .story-text {
             color: #fff;
             font-size: 3em;
-            text-align: center;
+            text-align: right;
             padding: 40px;
             text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
-            animation: slideInFromRight 5s ease-out forwards;
-            opacity: 0;
-            white-space: nowrap;
+            direction: rtl;
+            width: 100%;
+            line-height: 1.8;
         }
 
-        @keyframes slideInFromRight {
-            0% {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            20% {
-                opacity: 1;
-            }
-            80% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(-100%);
-                opacity: 0;
-            }
+        /* סגנון לפתיח - טקסט גדול במרכז */
+        .story-text.intro-style {
+            font-size: 5em;
+            text-align: center;
+            font-weight: bold;
+            line-height: 1.5;
+        }
+
+        /* סגנון לסיפור הראשי - טקסט גדול יותר מעט שמאלה */
+        .story-text.main-style {
+            font-size: 4.5em;
+            text-align: right;
+            padding-right: 200px;
+        }
+
+        /* סגנון לתווים בודדים באפקט מכונת הכתיבה */
+        .typewriter-char {
+            opacity: 0;
+            transition: opacity 0.05s ease;
+        }
+
+        .fade-in {
+            animation: fadeIn 2s ease-in forwards;
         }
 
         .fade-to-black {
             animation: fadeToBlack 2s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @keyframes fadeToBlack {
@@ -201,10 +214,9 @@
         }
 
         .shock-image {
-            max-width: 80%;
-            max-height: 60vh;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         /* Stage 5: Success Screen */
@@ -351,21 +363,23 @@
         <p class="instruction-text" id="stage2-instruction"></p>
     </div>
 
+    <!-- Middle Video Screen -->
+    <div id="middle-video-screen" class="screen">
+        <video id="middle-video" preload="auto">
+            <source src="vid/middle.mp4" type="video/mp4">
+        </video>
+    </div>
+
     <!-- Stage 3: Shock Ready - Wait for D2 -->
     <div id="stage3-screen" class="screen">
         <h1 class="shock-title" id="stage3-title"></h1>
         <p class="instruction-text" id="stage3-instruction"></p>
     </div>
 
-    <!-- Stage 4: Performing Shock - def2.png -->
-    <div id="stage4-screen" class="screen">
-        <img src="images/def2.png" alt="Shock in Progress" class="shock-image">
-    </div>
-
-    <!-- Video 2 Screen -->
-    <div id="video2-screen" class="screen">
-        <video id="video2" preload="auto">
-            <source src="vid/2.mp4" type="video/mp4">
+    <!-- End Video Screen (after shock) -->
+    <div id="end-video-screen" class="screen">
+        <video id="end-video" preload="auto">
+            <source src="vid/end.mp4" type="video/mp4">
         </video>
     </div>
 
@@ -383,7 +397,7 @@
 
         const CONFIG = {
             IDLE_TIMEOUT_MS: 2 * 60 * 1000, // 2 minutes
-            STORY_ANIMATION_DURATION: 5000, // 5 seconds for text scroll
+            TYPEWRITER_CHAR_DELAY: 80, // 80ms between each character in typewriter effect
             FADE_TO_BLACK_DURATION: 2000, // 2 seconds fade
             COUNTDOWN_DURATION: 5000, // countdown.wav - 5 seconds
             DEFI_DURATION: 3000, // defi.wav - 3 seconds
@@ -392,15 +406,19 @@
 
         const TRANSLATIONS = {
             he: {
-                story: "לפני שנים רבות, בקניון רמת אביב, התהלכו להם זוג חביב..",
+                storyIntro: "תל אביב, ישראל",
+                storyIntro2: "2025",
+                storyMain: "בקניון רמת אביב, התהלכו להם הזוג החביב בני ודבי",
                 stage2Title: "הדפיברילטור בידכם!!",
                 stage2Instruction: "כעת קחו את הכפות והדביקו לאיש!!",
                 stage3Title: "⚡ מוכנים לתת שוק חשמלי! ⚡",
                 stage3Instruction: "לחצו על הכפתור בצד לתת שוק חשמלי!",
-                stage5Title: "ברכות, הצלתם את הבחור הנחמד!!"
+                stage5Title: "ברכות, הצלתם את בני!!"
             },
             en: {
-                story: "Many years ago, at Ramat Aviv Mall, a lovely couple was walking..",
+                storyIntro: "Tel Aviv, Israel",
+                storyIntro2: "2025",
+                storyMain: "At Ramat Aviv Mall, the lovely couple Benny and Debby were walking",
                 stage2Title: "The Defibrillator is in Your Hands!!",
                 stage2Instruction: "Now take the pads and attach them to the person!!",
                 stage3Title: "⚡ Ready to Give Electric Shock! ⚡",
@@ -408,7 +426,9 @@
                 stage5Title: "Congratulations, You Saved the Nice Guy!!"
             },
             ar: {
-                story: "منذ سنوات عديدة، في مركز رمات أفيف التجاري، كان زوجان لطيفان يتجولان..",
+                storyIntro: "تل أبيب، إسرائيل",
+                storyIntro2: "2025",
+                storyMain: "في مركز رمات أفيف التجاري، كان الزوجان اللطيفان بيني وديبي يتجولان",
                 stage2Title: "جهاز إزالة الرجفان بين يديك!!",
                 stage2Instruction: "الآن خذ الأقطاب الكهربائية وألصقها بالشخص!!",
                 stage3Title: "⚡ جاهز لإعطاء الصدمة الكهربائية! ⚡",
@@ -538,10 +558,10 @@
             // Stage-specific actions
             switch (currentStage) {
                 case 'stage2':
-                    // D4 OR D6 = Pads placed on body
+                    // D4 OR D6 = Pads placed on body - manually advance to middle video
                     if (key === 'D4' || key === 'D6') {
-                        console.log('🩺 Pads connected to body (D4/D6 detected)');
-                        startStage3();
+                        console.log('🩺 Pads connected to body (D4/D6 detected) - playing middle video');
+                        playMiddleVideo();
                     }
                     break;
 
@@ -597,10 +617,8 @@
         function updateCurrentStageText() {
             // Update text based on current stage
             if (currentStage === 'stage1') {
-                const storyText = document.getElementById('story-text');
-                if (storyText) {
-                    storyText.textContent = TRANSLATIONS[currentLanguage].story;
-                }
+                // אם משנים שפה ב-stage1, מפעילים את האפקט מחדש מההתחלה
+                typewriterIntro();
             } else if (currentStage === 'stage2') {
                 document.getElementById('stage2-title').textContent = TRANSLATIONS[currentLanguage].stage2Title;
                 document.getElementById('stage2-instruction').textContent = TRANSLATIONS[currentLanguage].stage2Instruction;
@@ -628,22 +646,153 @@
 
             showScreen('stage1-screen');
 
+            // שלב 1: הצגת "תל אביב, 2025"
+            typewriterIntro();
+        }
+
+        function typewriterIntro() {
             const storyText = document.getElementById('story-text');
-            storyText.textContent = TRANSLATIONS[currentLanguage].story;
+            const introText = TRANSLATIONS[currentLanguage].storyIntro;
+            const intro2Text = TRANSLATIONS[currentLanguage].storyIntro2;
 
-            // Reset animation
-            storyText.style.animation = 'none';
-            storyText.offsetHeight; // Trigger reflow
-            storyText.style.animation = null;
-
-            // After text animation, fade to black then play video
+            // המתן 2.5 שניות לפני תחילת כל הפתיח
             setTimeout(() => {
-                storyText.classList.add('fade-to-black');
+                // ניקוי הטקסט הקיים
+                storyText.innerHTML = '';
+                storyText.className = 'story-text intro-style'; // סגנון פתיח
+                storyText.style.opacity = '0';
 
+                // הוספת fade-in
+                storyText.classList.add('fade-in');
+
+                // השמעת קריינות - תל אביב, ישראל עם דיליי של 1.5 שניות
                 setTimeout(() => {
-                    playVideo1();
-                }, CONFIG.FADE_TO_BLACK_DURATION);
-            }, CONFIG.STORY_ANIMATION_DURATION);
+                    playSound('sound/israel.mp3');
+                }, 1500);
+
+                // פיצול הטקסט לתווים בודדים - החלק הראשון
+                const chars = introText.split('');
+
+                // יצירת span לכל תו
+                chars.forEach((char) => {
+                    const span = document.createElement('span');
+                    span.className = 'typewriter-char';
+                    span.textContent = char;
+                    span.style.opacity = '0';
+                    storyText.appendChild(span);
+                });
+
+                // ירידת שורה
+                storyText.appendChild(document.createElement('br'));
+
+                // פיצול הטקסט לתווים בודדים - 2025
+                const chars2 = intro2Text.split('');
+                chars2.forEach((char) => {
+                    const span = document.createElement('span');
+                    span.className = 'typewriter-char typewriter-char-2025';
+                    span.textContent = char;
+                    span.style.opacity = '0';
+                    storyText.appendChild(span);
+                });
+
+                // המתן לסיום fade-in ואז התחל הקלדה
+                setTimeout(() => {
+                    // הצגת תווים אחד אחרי השני - החלק הראשון
+                    const spans = storyText.querySelectorAll('.typewriter-char:not(.typewriter-char-2025)');
+                    let charIndex = 0;
+
+                    const typingInterval = setInterval(() => {
+                        if (charIndex < spans.length) {
+                            spans[charIndex].style.opacity = '1';
+                            charIndex++;
+                        } else {
+                            clearInterval(typingInterval);
+
+                            // המתן חצי שניה ואז הצג את 2025
+                            setTimeout(() => {
+                                const spans2025 = storyText.querySelectorAll('.typewriter-char-2025');
+                                let char2025Index = 0;
+
+                                const typing2025Interval = setInterval(() => {
+                                    if (char2025Index < spans2025.length) {
+                                        spans2025[char2025Index].style.opacity = '1';
+                                        char2025Index++;
+                                    } else {
+                                        clearInterval(typing2025Interval);
+
+                                        // המתן רגע, ואז העלם והמשך לטקסט הראשי
+                                        setTimeout(() => {
+                                            storyText.classList.remove('fade-in');
+                                            storyText.classList.add('fade-to-black');
+
+                                            setTimeout(() => {
+                                                storyText.classList.remove('fade-to-black');
+                                                typewriterMain();
+                                            }, CONFIG.FADE_TO_BLACK_DURATION);
+                                        }, 1000); // המתן שנייה לאחר סיום ההקלדה
+                                    }
+                                }, CONFIG.TYPEWRITER_CHAR_DELAY);
+                            }, 500); // דיליי של חצי שניה לפני 2025
+                        }
+                    }, CONFIG.TYPEWRITER_CHAR_DELAY);
+                }, CONFIG.FADE_TO_BLACK_DURATION); // המתן לסיום fade-in
+            }, 2500); // דיליי של 2.5 שניות לפני תחילת הפתיח
+        }
+
+        function typewriterMain() {
+            const storyText = document.getElementById('story-text');
+            const mainText = TRANSLATIONS[currentLanguage].storyMain;
+
+            // ניקוי הטקסט הקיים
+            storyText.innerHTML = '';
+            storyText.className = 'story-text main-style'; // סגנון סיפור ראשי
+            storyText.style.opacity = '0';
+
+            // הוספת fade-in
+            storyText.classList.add('fade-in');
+
+            // השמעת קריינות - סיפור בני ודבי עם דיליי של 1.7 שניות
+            setTimeout(() => {
+                playSound('sound/benny.mp3');
+            }, 1700);
+
+            // פיצול הטקסט לתווים בודדים
+            const chars = mainText.split('');
+
+            // יצירת span לכל תו
+            chars.forEach((char) => {
+                const span = document.createElement('span');
+                span.className = 'typewriter-char';
+                span.textContent = char;
+                span.style.opacity = '0';
+                storyText.appendChild(span);
+            });
+
+            // המתן לסיום fade-in ואז התחל הקלדה
+            setTimeout(() => {
+                // הצגת תווים אחד אחרי השני
+                const spans = storyText.querySelectorAll('.typewriter-char');
+                let charIndex = 0;
+
+                const typingInterval = setInterval(() => {
+                    if (charIndex < spans.length) {
+                        spans[charIndex].style.opacity = '1';
+                        charIndex++;
+                    } else {
+                        clearInterval(typingInterval);
+
+                        // לאחר סיום ההקלדה, המתן רגע ועבור לסרטון
+                        setTimeout(() => {
+                            storyText.classList.remove('fade-in');
+                            storyText.classList.add('fade-to-black');
+
+                            setTimeout(() => {
+                                playVideo1();
+                            }, CONFIG.FADE_TO_BLACK_DURATION);
+                        }, 1000); // המתן שנייה לאחר סיום ההקלדה
+                    }
+                }, CONFIG.TYPEWRITER_CHAR_DELAY);
+            }, CONFIG.FADE_TO_BLACK_DURATION); // המתן לסיום fade-in
         }
 
         // =====================================
@@ -680,7 +829,31 @@
             document.getElementById('stage2-title').textContent = TRANSLATIONS[currentLanguage].stage2Title;
             document.getElementById('stage2-instruction').textContent = TRANSLATIONS[currentLanguage].stage2Instruction;
 
-            // Wait for button press (D6) - handled by keyboard listener
+            // השמעת קול הדפיברילטור
+            playSound('sound/defi.mp3');
+
+            // Wait for D6/D4 button press - handled by keyboard listener
+        }
+
+        // =====================================
+        // Middle Video (between stage2 and stage3)
+        // =====================================
+
+        function playMiddleVideo() {
+            console.log('🎥 Playing Middle Video');
+            currentStage = 'middle-video';
+            pauseTimeout(); // Don't count timeout during video
+            showScreen('middle-video-screen');
+
+            const video = document.getElementById('middle-video');
+            video.currentTime = 0;
+            video.play().catch(err => console.error('Middle video play error:', err));
+
+            video.onended = () => {
+                console.log('✅ Middle video ended');
+                resumeTimeout();
+                startStage3();
+            };
         }
 
         // =====================================
@@ -696,35 +869,39 @@
             document.getElementById('stage3-title').textContent = TRANSLATIONS[currentLanguage].stage3Title;
             document.getElementById('stage3-instruction').textContent = TRANSLATIONS[currentLanguage].stage3Instruction;
 
+            // השמעת קול מוכן לשוק
+            playSound('sound/shock.mp3');
+
             // Wait for D2 button press - handled by keyboard listener
         }
 
         function performShock() {
-            if (currentStage !== 'stage3' && currentStage !== 'stage4') {
-                // Allow shock from stage3 or if already triggered
-                if (currentStage === 'stage4') return; // Already in shock
+            if (currentStage !== 'stage3') {
                 return;
             }
 
-            console.log('⚡⚡⚡ Performing Shock!');
-            currentStage = 'stage4';
-            pauseTimeout(); // Don't count timeout during shock
+            console.log('⚡⚡⚡ Performing Shock! Playing end video...');
+            playEndVideo();
+        }
 
-            // Show def2.png image
-            showScreen('stage4-screen');
+        // =====================================
+        // End Video (after shock button pressed)
+        // =====================================
 
-            // Play countdown sound (5 seconds)
-            playSound('sound/countdown.wav');
+        function playEndVideo() {
+            console.log('🎥 Playing End Video');
+            currentStage = 'end-video';
+            pauseTimeout(); // Don't count timeout during video
+            showScreen('end-video-screen');
 
-            // After 5 seconds, play defi sound (3 seconds)
-            setTimeout(() => {
-                playSound('sound/defi.wav');
-            }, CONFIG.COUNTDOWN_DURATION);
+            const video = document.getElementById('end-video');
+            video.currentTime = 0;
+            video.play().catch(err => console.error('End video play error:', err));
 
-            // After 8 seconds total (5 + 3), move to video 2
-            setTimeout(() => {
-                playVideo2();
-            }, CONFIG.COUNTDOWN_DURATION + CONFIG.DEFI_DURATION);
+            video.onended = () => {
+                console.log('✅ End video ended');
+                startStage5();
+            };
         }
 
         // =====================================
@@ -740,26 +917,6 @@
         }
 
         // =====================================
-        // Video 2
-        // =====================================
-
-        function playVideo2() {
-            console.log('🎥 Playing Video 2');
-            currentStage = 'video2';
-            pauseTimeout(); // Don't count timeout during video
-            showScreen('video2-screen');
-
-            const video = document.getElementById('video2');
-            video.currentTime = 0;
-            video.play().catch(err => console.error('Video 2 play error:', err));
-
-            video.onended = () => {
-                console.log('✅ Video 2 ended');
-                startStage5();
-            };
-        }
-
-        // =====================================
         // Stage 5: Success Screen
         // =====================================
 
@@ -770,6 +927,9 @@
             showScreen('stage5-screen');
 
             document.getElementById('stage5-title').textContent = TRANSLATIONS[currentLanguage].stage5Title;
+
+            // השמעת ברכות
+            playSound('sound/brachot.mp3');
 
             // Create fireworks and confetti
             createFireworks();
